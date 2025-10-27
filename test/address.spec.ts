@@ -38,7 +38,7 @@ describe('AddressController', () => {
     it("should be rejected if request is invalid", async () => {
       const contact = await testService.getContact()
       const response = await request(app.getHttpServer())
-        .post(`/api/contacts/${contact?.id}/addresses`)
+        .post(`/api/contacts/${contact!.id}/addresses`)
         .set('Authorization', 'test')
         .send({
           street: '',
@@ -57,7 +57,7 @@ describe('AddressController', () => {
     it("should be able to create address", async () => {
       const contact = await testService.getContact()
       const response = await request(app.getHttpServer())
-        .post(`/api/contacts/${contact?.id}/addresses`)
+        .post(`/api/contacts/${contact!.id}/addresses`)
         .set('Authorization', 'test')
         .send({
           street: 'test street',
@@ -66,6 +66,62 @@ describe('AddressController', () => {
           country: 'test country',
           postal_code: '1111',
         })
+
+      logger.info(response.body)
+
+      expect(response.status).toBe(200)
+      expect(response.body.data.id).toBeDefined
+      expect(response.body.data.street).toBe('test street')
+      expect(response.body.data.city).toBe('test city')
+      expect(response.body.data.province).toBe('test province')
+      expect(response.body.data.country).toBe('test country')
+      expect(response.body.data.postal_code).toBe('1111')
+    })
+  })
+
+  describe("GET /api/contacts/:contactId/addresses/:addressId", () => {
+    beforeEach(async () => {
+      await testService.deleteAddress()
+      await testService.deleteContact()
+      await testService.deleteUser()
+
+      await testService.createUser()
+      await testService.createContact()
+      await testService.createAddress()
+    })
+
+    it("should be rejected if contact is not found", async () => {
+      const contact = await testService.getContact()
+      const address = await testService.getAddress()
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact!.id + 1}/addresses/${address!.id}`)
+        .set('Authorization', 'test')
+
+      logger.info(response.body)
+
+      expect(response.status).toBe(404)
+      expect(response.body.errors).toBeDefined()
+    })
+
+    it("should be rejected if address is not found", async () => {
+      const contact = await testService.getContact()
+      const address = await testService.getAddress()
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact!.id}/addresses/${address!.id + 1}`)
+        .set('Authorization', 'test')
+
+      logger.info(response.body)
+
+      expect(response.status).toBe(404)
+      expect(response.body.errors).toBeDefined()
+    })
+
+    it("should be able to get address", async () => {
+      const contact = await testService.getContact()
+      const address = await testService.getAddress()
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact!.id}/addresses/${address!.id}`)
+        .set('Authorization', 'test')
 
       logger.info(response.body)
 
