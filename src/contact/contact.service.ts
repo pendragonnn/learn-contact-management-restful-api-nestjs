@@ -3,9 +3,10 @@ import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { PrismaService } from "../common/prisma.service";
 import { Contact, User } from "@prisma/client";
-import { ContactResponse, CreateContactRequest, UpdateContactRequest } from "src/model/contact.model";
+import { ContactResponse, CreateContactRequest, SearchContactRequest, UpdateContactRequest } from "src/model/contact.model";
 import { ValidationService } from "../common/validation.service";
 import { ContactValidation } from "./contact.validation";
+import { WebResponse } from "src/model/web.model";
 
 @Injectable()
 export class ContactService {
@@ -13,11 +14,11 @@ export class ContactService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private prismaService: PrismaService,
     private validationService: ValidationService
-  ) {}
+  ) { }
 
   async create(user: User, request: CreateContactRequest): Promise<ContactResponse> {
     this.logger.debug(`ContactService.create(${JSON.stringify(user)}, ${JSON.stringify(request)})`)
-    
+
     const createRequest: CreateContactRequest = this.validationService.validate(ContactValidation.CREATE, request)
 
     const contact = await this.prismaService.contact.create({
@@ -36,7 +37,7 @@ export class ContactService {
       last_name: contact.last_name,
       email: contact.email,
       phone: contact.phone,
-      id: contact.id      
+      id: contact.id
     }
   }
 
@@ -48,7 +49,7 @@ export class ContactService {
       }
     })
 
-    if(!contact) {
+    if (!contact) {
       throw new HttpException('Contact is not found', 404)
     }
 
@@ -87,5 +88,57 @@ export class ContactService {
     })
 
     return this.toContactResponse(contact)
+  }
+
+  async search(user: User, request: SearchContactRequest): Promise<WebResponse<ContactResponse[]>> {
+    const searchRequest: SearchContactRequest = this.validationService.validate(ContactValidation.SEARCH, request)
+
+    const filters: any[] = []
+
+    if (searchRequest.name) {
+      filters.push({
+        OR: [
+          { first_name: { contains: searchRequest.name } },
+          { last_name: { contains: searchRequest.name } },
+        ]
+      })
+    }
+
+    if (searchRequest.email) {
+      filters.push({
+        email: { contains: searchRequest.email }
+      })
+    }
+
+    if (searchRequest.phone) {
+      filters.push({
+        phone: { contains: searchRequest.phone }
+      })
+    }
+
+    const skip = (searchRequest.page - 1) * searchRequest.size
+
+    const whereClause = filters.length > 0
+      ? { username: user.username, AND: filters }
+      : { username: user.username }
+
+    const contacts = await this.prismaService.contact.findMany({
+      where: whereClause,
+      take: searchRequest.size,
+      skip: skip,
+    })
+
+    const total = await this.prismaService.contact.count({
+      where: whereClause,
+    })
+
+    return {
+      data: contacts.map(contact => this.toContactResponse(contact)),
+      paging: {
+        current_page: searchRequest.page,
+        size: searchRequest.size,
+        total_page: Math.ceil(total / searchRequest.size)
+      }
+    }
   }
 }
