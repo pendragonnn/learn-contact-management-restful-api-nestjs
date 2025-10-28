@@ -13,22 +13,24 @@ import { AuthMiddleware } from './auth.middleware';
   imports: [
     WinstonModule.forRoot({
       format: winston.format.json(),
-      transports: [
-        new winston.transports.Console()
-      ]
+      transports: [new winston.transports.Console()],
     }),
     ConfigModule.forRoot({
-      isGlobal: true
-    })
+      isGlobal: true,
+    }),
   ],
-  providers: [PrismaService, ValidationService, {
-    provide: APP_FILTER,
-    useClass: ErrorFilter
-  }],
-  exports: [PrismaService, ValidationService]
+  providers: [
+    PrismaService,
+    ValidationService,
+    {
+      provide: APP_FILTER,
+      useClass: ErrorFilter,
+    },
+  ],
+  exports: [PrismaService, ValidationService],
 })
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('/api/*')
+    consumer.apply(AuthMiddleware).forRoutes('/api/*');
   }
 }

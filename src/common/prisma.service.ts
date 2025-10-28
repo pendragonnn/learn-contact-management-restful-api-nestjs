@@ -20,7 +20,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
   async onModuleInit() {
     await this.$connect();
-    
+
     (this.$on as any)('info', (e: any) => this.logger.info(e));
     (this.$on as any)('warn', (e: any) => this.logger.warn(e));
     (this.$on as any)('error', (e: any) => this.logger.error(e));

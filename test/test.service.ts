@@ -1,40 +1,40 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../src/common/prisma.service";
-import * as bcrypt from 'bcrypt'
-import { Address, Contact, User } from "@prisma/client";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../src/common/prisma.service';
+import * as bcrypt from 'bcrypt';
+import { Address, Contact, User } from '@prisma/client';
 
 @Injectable()
 export class TestService {
   constructor(private prismaService: PrismaService) {}
 
   async deleteAll() {
-    await this.deleteAddress()
-    await this.deleteContact()
-    await this.deleteUser()
+    await this.deleteAddress();
+    await this.deleteContact();
+    await this.deleteUser();
   }
 
   async deleteUser() {
     await this.prismaService.user.deleteMany({
       where: {
-        username: 'test'
-      }
-    })
+        username: 'test',
+      },
+    });
   }
 
   async deleteContact() {
     await this.prismaService.contact.deleteMany({
       where: {
-        username: 'test'
-      }
-    })
+        username: 'test',
+      },
+    });
   }
 
   async getUser(): Promise<User | null> {
     return this.prismaService.user.findUnique({
       where: {
-        username: 'test'
-      }
-    })
+        username: 'test',
+      },
+    });
   }
 
   async createUser() {
@@ -43,17 +43,17 @@ export class TestService {
         username: 'test',
         name: 'test',
         password: await bcrypt.hash('test', 10),
-        token: "test"
-      }
-    })
+        token: 'test',
+      },
+    });
   }
 
   async getContact(): Promise<Contact | null> {
     return this.prismaService.contact.findFirst({
       where: {
-        username: 'test'
-      }
-    })
+        username: 'test',
+      },
+    });
   }
 
   async createContact() {
@@ -63,43 +63,43 @@ export class TestService {
         last_name: 'test',
         email: 'test@example.com',
         phone: '9999',
-        username: 'test'
-      }
-    })
+        username: 'test',
+      },
+    });
   }
 
   async deleteAddress() {
     await this.prismaService.address.deleteMany({
       where: {
         contact: {
-          username: 'test'
-        }
-      }
-    })
+          username: 'test',
+        },
+      },
+    });
   }
 
   async createAddress() {
-    const contact = await this.getContact()
-    
+    const contact = await this.getContact();
+
     await this.prismaService.address.create({
       data: {
         contact_id: contact!.id,
-        street: "test street",
-        city: "test city",
-        province: "test province",
-        country: "test country",
-        postal_code: "1111"
-      }
-    })
+        street: 'test street',
+        city: 'test city',
+        province: 'test province',
+        country: 'test country',
+        postal_code: '1111',
+      },
+    });
   }
 
   async getAddress(): Promise<Address | null> {
     return await this.prismaService.address.findFirst({
       where: {
         contact: {
-          username: 'test'
-        }
-      }
-    })
+          username: 'test',
+        },
+      },
+    });
   }
 }

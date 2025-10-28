@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Logger } from 'winston'
+import { Logger } from 'winston';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
@@ -10,8 +10,8 @@ import { TestModule } from './test.module';
 
 describe('UserController', () => {
   let app: INestApplication<App>;
-  let logger: Logger
-  let testService: TestService
+  let logger: Logger;
+  let testService: TestService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,223 +21,223 @@ describe('UserController', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    logger = app.get(WINSTON_MODULE_PROVIDER)
-    testService = app.get(TestService)
+    logger = app.get(WINSTON_MODULE_PROVIDER);
+    testService = app.get(TestService);
   });
 
-  describe("POST /api/users", () => {
+  describe('POST /api/users', () => {
     beforeEach(async () => {
-      await testService.deleteAll()
-    })
+      await testService.deleteAll();
+    });
 
-    it("should be rejected if request is invalid", async () => {
+    it('should be rejected if request is invalid', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users')
         .send({
           username: '',
           password: '',
-          name: ''
-        })
+          name: '',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(400)
-      expect(response.body.errors).toBeDefined()
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
 
-    it("should be able to register", async () => {
+    it('should be able to register', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users')
         .send({
           username: 'test',
           password: 'test',
-          name: 'test'
-        })
+          name: 'test',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.username).toBe('test')
-      expect(response.body.data.name).toBe('test')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test');
+    });
 
-    it("should be rejected if username already exist", async () => {
-      await testService.createUser()
+    it('should be rejected if username already exist', async () => {
+      await testService.createUser();
       const response = await request(app.getHttpServer())
         .post('/api/users')
         .send({
           username: 'test',
           password: 'test',
-          name: 'test'
-        })
+          name: 'test',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(400)
-      expect(response.body.errors).toBeDefined()
-    })
-  })
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+  });
 
-  describe("POST /api/users/login", () => {
+  describe('POST /api/users/login', () => {
     beforeEach(async () => {
-      await testService.deleteAll()
-      await testService.createUser()
-    })
+      await testService.deleteAll();
+      await testService.createUser();
+    });
 
-    it("should be rejected if request is invalid", async () => {
+    it('should be rejected if request is invalid', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users/login')
         .send({
           username: '',
           password: '',
-        })
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(400)
-      expect(response.body.errors).toBeDefined()
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
 
-    it("should be able to login", async () => {
+    it('should be able to login', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/users/login')
         .send({
           username: 'test',
           password: 'test',
-        })
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.username).toBe('test')
-      expect(response.body.data.name).toBe('test')
-      expect(response.body.data.token).toBeDefined()
-    })
-  })
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test');
+      expect(response.body.data.token).toBeDefined();
+    });
+  });
 
-  describe("GET /api/users/current", () => {
+  describe('GET /api/users/current', () => {
     beforeEach(async () => {
-      await testService.deleteAll()
-      await testService.createUser()
-    })
+      await testService.deleteAll();
+      await testService.createUser();
+    });
 
-    it("should be rejected if token is invalid", async () => {
+    it('should be rejected if token is invalid', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/users/current')
-        .set('Authorization', 'wrong')
+        .set('Authorization', 'wrong');
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(401)
-      expect(response.body.errors).toBeDefined()
-    })
+      expect(response.status).toBe(401);
+      expect(response.body.errors).toBeDefined();
+    });
 
-    it("should be able to get user", async () => {
+    it('should be able to get user', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/users/current')
-        .set('Authorization', 'test')
+        .set('Authorization', 'test');
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.username).toBe('test')
-      expect(response.body.data.name).toBe('test')
-    })
-  })
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test');
+    });
+  });
 
-  describe("PATCH /api/users/current", () => {
+  describe('PATCH /api/users/current', () => {
     beforeEach(async () => {
-      await testService.deleteAll()
-      await testService.createUser()
-    })
+      await testService.deleteAll();
+      await testService.createUser();
+    });
 
-    it("should be rejected if request is invalid", async () => {
+    it('should be rejected if request is invalid', async () => {
       const response = await request(app.getHttpServer())
         .patch('/api/users/current')
         .set('Authorization', 'test')
         .send({
           password: '',
-          name: ''
-        })
+          name: '',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(400)
-      expect(response.body.errors).toBeDefined()
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
 
-    it("should be able update name", async () => {
+    it('should be able update name', async () => {
       const response = await request(app.getHttpServer())
         .patch('/api/users/current')
         .set('Authorization', 'test')
         .send({
-          name: 'test updated'
-        })
+          name: 'test updated',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.username).toBe('test')
-      expect(response.body.data.name).toBe('test updated')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test updated');
+    });
 
-    it("should be able update password", async () => {
+    it('should be able update password', async () => {
       let response = await request(app.getHttpServer())
         .patch('/api/users/current')
         .set('Authorization', 'test')
         .send({
-          password: 'updated'
-        })
+          password: 'updated',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.username).toBe('test')
-      expect(response.body.data.name).toBe('test')
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe('test');
+      expect(response.body.data.name).toBe('test');
 
       response = await request(app.getHttpServer())
         .post('/api/users/login')
         .send({
           username: 'test',
-          password: 'updated'
-        })
+          password: 'updated',
+        });
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.token).toBeDefined()
-    })
-  })
+      expect(response.status).toBe(200);
+      expect(response.body.data.token).toBeDefined();
+    });
+  });
 
-  describe("DELETE /api/users/current", () => {
+  describe('DELETE /api/users/current', () => {
     beforeEach(async () => {
-      await testService.deleteAll()
-      await testService.createUser()
-    })
+      await testService.deleteAll();
+      await testService.createUser();
+    });
 
-    it("should be rejected if token is invalid", async () => {
+    it('should be rejected if token is invalid', async () => {
       const response = await request(app.getHttpServer())
         .delete('/api/users/current')
-        .set('Authorization', 'wrong')
+        .set('Authorization', 'wrong');
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(401)
-      expect(response.body.errors).toBeDefined()
-    })
+      expect(response.status).toBe(401);
+      expect(response.body.errors).toBeDefined();
+    });
 
-    it("should be able to logout user", async () => {
+    it('should be able to logout user', async () => {
       const response = await request(app.getHttpServer())
         .delete('/api/users/current')
-        .set('Authorization', 'test')
+        .set('Authorization', 'test');
 
-      logger.info(response.body)
+      logger.info(response.body);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data).toBe(true)
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBe(true);
 
-      const user = await testService.getUser()
-      expect(user?.token).toBe(null)
-    })
-  })
+      const user = await testService.getUser();
+      expect(user?.token).toBe(null);
+    });
+  });
 });
